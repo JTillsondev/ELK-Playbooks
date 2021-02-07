@@ -1,0 +1,36 @@
+---
+ - name: Installing and launching filebeat
+   hosts: webservers
+   become: yes
+   tasks:
+
+     - name: Increase virtual memory
+       command: sysctl -w vm.max_map_count=262144
+
+     - name: increase virtual memory on restart
+       command: echo "vm.max_map_count=262144" >> /etc/sysctl.conf
+
+     - name: download filebeat .deb
+       command: curl -L -O https://artifacts.elastic.co/downloads/bea$
+
+     - name: install filebeat .deb
+       command: tar xzvf filebeat-7.10.2-linux-x86_64.tar.gz
+
+     - name: drop in filebeat.yml
+       copy:
+         src: /etc/ansible/files/filebeat-config.yml
+         dest: /etc/filebeat/filebeat.yml
+
+     - name: enable and configure system module
+       command: filebeat modules enable system
+
+     - name: set up filebeat
+       command: filebeat setup
+
+     - name: start filebeat service
+       command: service filebeat start
+
+     - name: enable service filebeat on boot
+       systemd:
+         name: filebeat
+         enabled: yes
